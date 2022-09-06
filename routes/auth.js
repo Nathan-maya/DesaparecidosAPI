@@ -16,7 +16,7 @@ router.post('/register', async (req, res) => {
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json('Houve um erro Inesperado, tente novamente mais tarde');
   }
 });
 
@@ -27,20 +27,24 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({
       username: req.body.username,
     });
-    !user && res.status(401).json('Usuário ou senha incorreta!');
+    if(!user){
+      return res.status(401).json('Usuário ou senha incorreta!');
+    }
     const hashedPassword = CryptoJS.AES.decrypt(
       user.password,
       process.env.PASSWORD_SECRET,
     );
     const OriginPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
-    OriginPassword !== req.body.password &&
-      res.status(401).json('Usuário ou senha incorreta!');
+    if(OriginPassword !== req.body.password) {
+      return res.status(401).json('Usuário ou senha incorreta!');
+    }
+
 
     //Desestruturando user e "retirando" password
     const { password, ...others } = user._doc;
-    res.status(200).json({ ...others });
+    return res.status(200).json({ ...others });
   } catch (err) {
-    res.status(500).json('não foi possivel completar login' + err);
+    return res.status(500).json('não foi possivel completar login' + err);
   }
 });
 

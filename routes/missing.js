@@ -18,4 +18,18 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.get('/img', async (req, res) => {
+  try {
+    const missingImg = await Missing.aggregate([{$addFields:{firstElem:{$first:"$img"}}}])
+    const firstImg =[]
+    missingImg.forEach((element)=>{
+      firstImg.push(element.firstElem)
+    })
+    console.log(firstImg)
+    res.status(200).json(firstImg);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 module.exports = router;
