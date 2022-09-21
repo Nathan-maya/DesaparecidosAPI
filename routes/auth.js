@@ -39,8 +39,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json('Usuário ou senha incorreta!');
     }
 
-
-    //Desestruturando user e "retirando" password
     const { password, ...others } = user._doc;
     return res.status(200).json({ ...others });
   } catch (err) {

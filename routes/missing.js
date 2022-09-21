@@ -1,6 +1,8 @@
 const Missing = require('../models/Missing');
 const router = require('express').Router();
 
+
+//Cadastra a pessoa desaparecida
 router.post('/', async (req, res) => {
   const newMissing = new Missing({
     nome: req.body.nome,
@@ -18,18 +20,41 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/img', async (req, res) => {
+//Retorna a primeira imagem de cada pessoa desaparecida
+router.get('/find/img', async (req, res) => {
   try {
     const missingImg = await Missing.aggregate([{$addFields:{firstElem:{$first:"$img"}}}])
     const firstImg =[]
     missingImg.forEach((element)=>{
-      firstImg.push(element.firstElem)
+      firstImg.push([element._id,element.firstElem])
     })
-    console.log(firstImg)
     res.status(200).json(firstImg);
   } catch (err) {
     res.status(500).json(err);
   }
 });
+
+//Retorna os dados de uma única pessoa
+router.get('/find/missing/:id',async (req,res)=>{
+  try{
+    const missing = await Missing.findById(req.params.id)
+
+    return res.status(200).json(missing)
+  }catch(err){
+    return res.status(500).json(err)
+  }
+})
+
+router.get('/find/recognition',async(req,res)=>{
+  try {
+    const missingImg = await Missing.find()
+    const dataMissing = missingImg.map((missing)=>{
+      return {'id': missing._id,'nome':missing.nome, 'img' : missing.img }
+    })
+    return res.status(200).json(dataMissing);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+})
 
 module.exports = router;
